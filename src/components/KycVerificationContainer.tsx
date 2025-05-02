@@ -53,6 +53,7 @@ const KycVerificationContainer: React.FC<KycVerificationContainerProps> = ({
   const { data: sessionId, isLoading: loadingSession } = useFaceLivenessSessionId(startDetection);
   const mutation = useFaceLivenessResult();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [fatherDomain,setFatherDomain] = useState();
 
   useEffect(() => {
     if (sessionId && step === 1) setDialogOpen(true);
@@ -66,36 +67,56 @@ const KycVerificationContainer: React.FC<KycVerificationContainerProps> = ({
   const handleAnalysisComplete = async () => {
     const result = await mutation.mutateAsync(sessionId!);
     const confidence = Number(result.Confidence?.toFixed(2));
-
+  
     if (confidence <= Number(import.meta.env.VITE_FACELIVENESS_CONFIDENCE)) {
       toast.error(`Baixa confiabilidade: ${confidence}`);
       handleClose();
       return;
     }
-
+  
     try {
       const video = document.querySelector("video");
       if (video) {
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-
+  
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
-        onImageCapture(dataUrl); // envia a imagem como base64
-        toast.success("Imagem capturada com sucesso!");
+  
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.95); // imagem em base64
+  
+        const verificationResult = {
+          source: "kyc-verification",
+          status: "success",
+          faceMatch: true,
+          userId: "abc123", // use o ID real, se disponível
+          confidence: confidence,
+          selfieBase64: dataUrl
+        };
+  
+        const urlPai = 'http://localhost:5173/'
+        if (urlPai) {
+          window.parent.postMessage(
+            {
+              status: "success",
+              faceMatch: true,
+              userId: "123456",
+            },
+            urlPai
+          );
+        }
         onStepChange(2);
       }
     } catch (error) {
       console.error("Erro ao capturar imagem:", error);
       toast.error("Erro ao capturar imagem.");
     }
-
+  
     toast.success(`Verificação facial concluída! Confiabilidade: ${confidence}`);
     handleClose();
   };
+  
 
   const renderStepContent = () => {
     switch (step) {

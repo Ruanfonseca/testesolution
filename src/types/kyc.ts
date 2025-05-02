@@ -15,6 +15,7 @@ export interface KycVerificationContainerProps {
   capturedImage: string | null;
   termsAccepted: boolean;
   isLoading: boolean;
+  fatherDomain:string;
   verificationResult: KycResponseDTO | null;
   onStepChange: (step: number) => void;
   onUserDataChange: (data: UserData) => void;
