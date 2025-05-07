@@ -1,65 +1,46 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface VerificationProgressProps {
   currentStep: number;
-  faceLiveness?: boolean;
+  faceLiveness: boolean;
 }
 
-const VerificationProgress: React.FC<VerificationProgressProps> = ({ 
-  currentStep, 
-  faceLiveness = false 
-}) => {
+const VerificationProgress: React.FC<VerificationProgressProps> = ({ currentStep, faceLiveness }) => {
   const steps = [
-    "Informações pessoais",
-    faceLiveness ? "Verificação facial ao vivo" : "Envio de documento",
-    "Verificação",
-    "Resultado"
+    { id: 0, name: "Início" },
+    { id: 1, name: faceLiveness ? "Verificação Facial" : "Dados Pessoais" },
+    { id: 2, name: "Documento" },
+    { id: 3, name: "Processando" },
+    { id: 4, name: "Resultado" }
   ];
-  
+
   return (
-    <Card className="mb-6">
-      <CardHeader className="bg-primary/5 pb-2">
-        <CardTitle className="text-lg text-primary">Processo de Verificação</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-4 pb-3">
-        <div className="flex w-full justify-between">
-          {steps.map((step, index) => (
-            <div key={index} className="flex flex-col items-center">
-              <div className={`
-                w-8 h-8 rounded-full flex items-center justify-center mb-2
-                ${index < currentStep 
-                  ? "bg-primary text-primary-foreground" 
-                  : index === currentStep 
-                    ? "bg-primary text-primary-foreground" 
-                    : "bg-gray-200 text-gray-500"}
-              `}>
-                {index < currentStep ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  index + 1
-                )}
-              </div>
-              <span className={`text-xs text-center ${index === currentStep ? "font-semibold" : "text-gray-500"}`}>
-                {step}
+    <div className="mb-8">
+      <div className="flex justify-between">
+        {steps.map((step) => (
+          <div 
+            key={step.id} 
+            className={`flex flex-col items-center ${step.id <= currentStep ? "text-primary" : "text-gray-400"}`}
+          >
+            <div className={`relative flex h-6 w-6 items-center justify-center rounded-full border ${step.id <= currentStep ? "border-primary bg-primary" : "border-gray-300 bg-white"}`}>
+              <span className={`text-xs ${step.id <= currentStep ? "text-white" : "text-gray-500"}`}>
+                {step.id + 1}
               </span>
             </div>
-          ))}
-        </div>
-        
-        <div className="mt-3 flex w-full">
-          {steps.slice(0, -1).map((_, index) => (
-            <div 
-              key={index}
-              className={`flex-1 h-1 ${index < currentStep ? "bg-primary" : "bg-gray-200"}`}
-            />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            <span className="text-xs mt-1 hidden sm:block">{step.name}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 grid grid-cols-4">
+        {steps.slice(0, -1).map((step, i) => (
+          <div 
+            key={step.id} 
+            className={`h-1 ${step.id < currentStep ? "bg-primary" : "bg-gray-300"}`}
+          ></div>
+        ))}
+      </div>
+    </div>
   );
 };
 

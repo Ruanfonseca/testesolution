@@ -1,3 +1,6 @@
+// Implementing the missing validateUserData function
+import { UserData } from "@/types/kyc";
+
 
 export const validateCPF = (cpf: string): boolean => {
   const cleanedCPF = cpf.replace(/\D/g, '');
@@ -84,8 +87,7 @@ export const formatDateForAPI = (date: string): string => {
   return date;
 };
 
-// Implementing the missing validateUserData function
-import { UserData } from "@/types/kyc";
+
 
 export const validateUserData = (userData: UserData): boolean => {
   // Validate fullName (at least two names, minimum 5 characters)
@@ -100,10 +102,6 @@ export const validateUserData = (userData: UserData): boolean => {
     return false;
   }
   
-  // Validate birthDate
-  if (!validateDate(userData.birthDate)) {
-    return false;
-  }
   
   return true;
 };

@@ -1,133 +1,130 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DocumentOptions from "@/components/DocumentOptions";
-import Camera from "@/components/Camera";
-import DocumentUploader from "@/components/DocumentUploader";
-import { DocumentCaptureMethod, VerificationMethod } from "@/types/kyc";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RegulaData, UserData } from "@/types/kyc";
 
 interface DocumentVerificationFormProps {
-  verificationMethod: VerificationMethod;
-  documentType: "cnh" | "document";
-  captureMethod: DocumentCaptureMethod;
   capturedImage: string | null;
   isLoading: boolean;
-  onVerificationMethodChange: (method: VerificationMethod) => void;
-  onDocumentTypeChange: (type: "cnh" | "document") => void;
-  onCaptureMethodChange: (method: DocumentCaptureMethod) => void;
-  onImageCapture: (imageData: string) => void;
+  onImageCapture: (imageData: string, side: "front" | "back") => void;
   onVerify: () => void;
+  userData:UserData
 }
 
 const DocumentVerificationForm: React.FC<DocumentVerificationFormProps> = ({
-  verificationMethod,
-  documentType,
-  captureMethod,
-  capturedImage,
   isLoading,
-  onVerificationMethodChange,
-  onDocumentTypeChange,
-  onCaptureMethodChange,
   onImageCapture,
   onVerify,
+  userData
 }) => {
+  const [documentImages, setDocumentImages] = useState<RegulaData>({
+    ...userData,
+    front: null,
+    back: null,
+    type:"documentLess"
+  });
+
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const formData = new FormData();
+
+ const handleFileChange = async (
+  e: React.ChangeEvent<HTMLInputElement>,
+  side: "front" | "back"
+) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    const base64 = reader.result as string;
+
+    const documentBytes = Object.values(file ?? []);
+    const uint8Array = new Uint8Array(documentBytes);
+    formData.append(
+      side === "front" ? "documentBytesFront" : "documentBytesBack",
+      new Blob([uint8Array])
+    );
+
+    setDocumentImages((prev) => ({
+      ...prev,
+      [side]: base64,
+    }));
+
+    onImageCapture(base64, side);
+  };
+  reader.readAsDataURL(file);
+};
+
+
+
+
   return (
-    <div>
-      <Tabs defaultValue={verificationMethod} onValueChange={(v) => onVerificationMethodChange(v as VerificationMethod)}>
-        <TabsList className="grid w-full grid-cols-3 mb-6">
-          {/* <TabsTrigger value="regular">Verificação Padrão</TabsTrigger>
-          <TabsTrigger value="faceLiveness">Verificação Facial ao Vivo</TabsTrigger> */}
-          <TabsTrigger value="rekognition">Rekognition</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="regular">
-          <div className="space-y-4">
-            <div className="flex flex-col space-y-3">
-              <label className="font-medium">Tipo de Documento:</label>
-              <div className="flex space-x-4">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    checked={documentType === "cnh"}
-                    onChange={() => onDocumentTypeChange("cnh")}
-                    className="rounded text-primary focus:ring-primary"
-                  />
-                  <span>CNH Digital</span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    checked={documentType === "document"}
-                    onChange={() => onDocumentTypeChange("document")}
-                    className="rounded text-primary focus:ring-primary"
-                  />
-                  <span>Outro documento com foto</span>
-                </label>
+    <div className="space-y-4">
+      <div>
+        <Label htmlFor="front-document" className="block font-medium mb-2">Frente do documento</Label>
+        <div className="flex flex-col space-y-2">
+          <input
+            id="front-document"
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileChange(e, "front")}
+            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+          />
+          {documentImages.front && (
+              <div className="relative mt-2 border rounded-md overflow-hidden">
+                <img 
+                  src={documentImages.front} 
+                  alt="Frente do documento" 
+                  className="w-full h-auto max-h-48 object-contain"
+                />
               </div>
-            </div>
-            
-            {captureMethod === "options" ? (
-              <DocumentOptions onOptionSelected={onCaptureMethodChange} />
-            ) : captureMethod === "camera" ? (
-              <Camera onCapture={onImageCapture} />
-            ) : (
-              <DocumentUploader 
-                onImageSelected={onImageCapture}
-                documentType={documentType}
-              />
             )}
-            
-            {captureMethod !== "options" && (
-              <Button 
-                onClick={() => onCaptureMethodChange("options")} 
-                variant="outline" 
-                className="w-full mt-2"
-              >
-                Voltar para opções
-              </Button>
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="back-document" className="block font-medium mb-2">Verso do documento</Label>
+        <div className="flex flex-col space-y-2">
+          <input
+            id="back-document"
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileChange(e, "back")}
+            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+          />
+          {documentImages.back && (
+              <div className="relative mt-2 border rounded-md overflow-hidden">
+                <img 
+                  src={documentImages.back} 
+                  alt="Verso do documento" 
+                  className="w-full h-auto max-h-48 object-contain"
+                />
+              </div>
             )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="faceLiveness">
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground mb-2">
-              Siga as instruções para realizar a verificação facial ao vivo.
-              Certifique-se de estar em um local bem iluminado e olhe diretamente para a câmera.
-            </p>
-            
-            <Camera 
-              onCapture={onImageCapture} 
-              faceLiveness={true}
-            />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="rekognition">
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground mb-2">
-              Posicione seu rosto no quadro para análise biométrica com o sistema Amazon Rekognition.
-              Este processo verifica sua identidade de forma segura e precisa.
-            </p>
-            
-            <Camera 
-              onCapture={onImageCapture} 
-              rekognition={true}
-            />
-          </div>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="mt-6">
-        <Button 
-          onClick={onVerify} 
-          disabled={!capturedImage || isLoading}
-          className="w-full"
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-2 pt-4">
+        <Checkbox 
+          id="terms" 
+          checked={termsAccepted}
+          onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+        />
+        <Label htmlFor="terms" className="text-sm text-muted-foreground">
+          Eu concordo com os termos de privacidade e de verificação de identidade
+        </Label>
+      </div>
+
+      <Button
+          onClick={onVerify}
+          disabled={!documentImages.front || !documentImages.back || !termsAccepted || isLoading}
+          className="w-full mt-4"
         >
           {isLoading ? "Processando..." : "Verificar identidade"}
         </Button>
-      </div>
+
     </div>
   );
 };

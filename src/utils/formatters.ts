@@ -30,29 +30,31 @@ export const formatDateString = (date: string): string => {
   return `${parts[2]}/${parts[1]}/${parts[0]}`;
 };
 
-export const parseURLParams = (): { name?: string, cpf?: string, birthDate?: string } => {
+export const parseURLParams = (): {
+  fatherUrl: string; name?: string, cpf?: string, birthDate?: string 
+} => {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
-  
-  // Support multiple parameter naming conventions for compatibility
-  return {
+    return {
     name: params.nome || params.name || params.fullName || params.fullname || '',
     cpf: params.cpf || params.documento || params.document || '',
-    birthDate: params.dataNascimento || params.birthDate || params.data || params.date || ''
+    birthDate: params.dataNascimento || params.birthDate || params.data || params.date || '',
+    fatherUrl:params.fatherUrl
   };
 };
 
-// Add event listener to receive messages from parent iframe
-export const setupIframeMessageListener = (callback: (data: { name?: string, cpf?: string, birthDate?: string }) => void) => {
+export const setupIframeMessageListener = (callback: (data: {
+  fatherUrl: string; name?: string, cpf?: string, birthDate?: string 
+}) => void) => {
   window.addEventListener('message', (event) => {
-    // For security, you may want to check event.origin here
-    const { name, cpf, birthDate, dataNascimento, fullName } = event.data || {};
+    const { name, cpf, birthDate, dataNascimento, fullName,fatherUrl } = event.data || {};
     
     if (name || cpf || birthDate || dataNascimento || fullName) {
       callback({
         name: fullName || name || '',
         cpf: cpf || '',
-        birthDate: dataNascimento || birthDate || ''
+        birthDate: dataNascimento || birthDate || '',
+        fatherUrl:fatherUrl
       });
     }
   });

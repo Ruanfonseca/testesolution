@@ -1,8 +1,40 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { verifyFacialLiveness } from "@/services/api";
+import { ResponseWebService, UserData } from "@/types/kyc";
 
-const ProcessingVerification: React.FC = () => {
+interface ProcessingVerificationProps {
+  userData: UserData;
+  onStepChange: (step: number) => void;
+  setResponseWebService: (response: ResponseWebService) => void;
+}
+
+const ProcessingVerification: React.FC<ProcessingVerificationProps> = ({
+  userData,
+  onStepChange,
+  setResponseWebService
+}) => {
+  useEffect(() => {
+    const processVerification = async () => {
+      try {
+        const result = await verifyFacialLiveness(userData);
+        setResponseWebService(result);
+
+        if (result.approved) {
+          onStepChange(4); // Ir para resultado final
+        } else {
+          onStepChange(2); // Voltar para verificação documental
+        }
+        
+      } catch (error) {
+        console.error("Erro na verificação facial:", error);
+        onStepChange(2); // fallback
+      }
+    };
+
+    processVerification();
+  }, [userData, onStepChange, setResponseWebService]);
+
   return (
     <Card>
       <CardHeader className="bg-primary/5">

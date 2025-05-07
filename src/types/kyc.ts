@@ -1,10 +1,18 @@
 
 export interface UserData {
-  fullName: string;
-  cpf: string;
-  birthDate: string;
+  fullName?: string;
+  cpf?: string;
+  birthDate?: string;
   referenceImg?: Uint8Array; 
+  fatherUrl?:string;
 }
+
+export interface RegulaData extends UserData {
+  front?: string | null; 
+  back?: string | null;
+  type?:string;  
+}
+
 
 export interface KycVerificationContainerProps {
   step: number;
@@ -15,7 +23,6 @@ export interface KycVerificationContainerProps {
   capturedImage: string | null;
   termsAccepted: boolean;
   isLoading: boolean;
-  fatherDomain:string;
   verificationResult: KycResponseDTO | null;
   onStepChange: (step: number) => void;
   onUserDataChange: (data: UserData) => void;
@@ -39,6 +46,21 @@ export interface VerificationResult {
 export interface FacialValidationDTO {
   approved: boolean;
   message: string;
+}
+
+export interface KycResponseDTO {
+  id: string;
+  status: 'APPROVED' | 'REJECTED' | 'PENDING';
+  message?: string;
+  createdAt: string;
+  pepStatus?: boolean;
+  documentData?: {
+    name?: string;
+    number?: string;
+    expiryDate?: string;
+    issuingAuthority?: string;
+    documentType?: string;
+  }
 }
 
 // Equivalente ao KycUserDocumentDTO do backend
@@ -74,6 +96,8 @@ export interface KycRegisterPayload {
   referenceImage: string; // Imagem codificada em base64
   type: 'cnh' | 'document'; // Tipo de verificação
   verificationMethod?: VerificationMethod; // Método de verificação opcional
+  front:string;
+  back:string;
 }
 
 export type VerificationMethod = 'regular' | 'faceLiveness' | 'rekognition';
@@ -124,3 +148,69 @@ export interface RegulaResponse {
 
 // Opções para upload e captura de documento
 export type DocumentCaptureMethod = 'mobile' | 'camera' | 'upload' | 'options';
+
+
+
+
+//pep interfaces
+export interface PepFunction {
+  code: number;
+  description: string;
+}
+
+export interface PepOrgan {
+  code: number;
+  description: string;
+  address: string;
+}
+
+export interface PepMandate {
+  function: PepFunction;
+  appointmentDate: string;
+  exonerationDate: string;
+  reasonExoneration: string;
+  organ: PepOrgan;
+}
+
+export interface PepAssociate {
+  document: string;
+  dateBirth: string;
+  name: string;
+  relationship: string;
+}
+
+export interface PepRelative {
+  document: string;
+  name: string;
+  bond: string;
+}
+
+export interface PepData {
+  name: string;
+  document: string;
+  typeIndicator: string;
+  pepIndicator: string;
+  dateBirth: string;
+  hasMandatesPermission: boolean;
+  hasAssociatePermission: boolean;
+  hasRelativePermission: boolean;
+  messageMandatesPermission: string;
+  messageAssociatePermission: string;
+  messageRelativePermission: string;
+  mandates: PepMandate[];
+  associates: PepAssociate[];
+  relatives: PepRelative[];
+}
+
+export interface Enrichment {
+  document: string;
+  pep: PepData;
+}
+
+export interface ResponseWebService{
+  approved:Boolean 
+  message:String 
+  enrichments?: Enrichment[];
+
+}
+

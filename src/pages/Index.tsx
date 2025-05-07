@@ -26,7 +26,8 @@ const Index = () => {
     fullName: "",
     cpf: "",
     birthDate: "",
-    referenceImg:null
+    referenceImg:null,
+    fatherUrl:''
   });
   const [verificationResult, setVerificationResult] = useState<KycResponseDTO | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,7 +37,7 @@ const Index = () => {
     if (window.parent && window.parent !== window) {
       window.parent.postMessage({
         type: 'KYC_VERIFICATION_COMPLETE',
-        data: result
+        data: JSON.stringify(result)
       }, '*');
     }
   };
@@ -44,9 +45,7 @@ const Index = () => {
   // Analisa parâmetros de URL quando o componente é montado
   useEffect(() => {
     const params = parseURLParams();
-    const isReady = params.name && params.cpf && params.birthDate;
-  
-
+    const isReady = params.name && params.cpf && params.birthDate && params.fatherUrl;
 
     if (isReady) {
       const updatedData = {
@@ -54,11 +53,14 @@ const Index = () => {
         cpf: params.cpf,
         birthDate: params.birthDate,
         referenceImg: null,
+        fatherUrl:params.fatherUrl
       };
   
       setUserData(updatedData);
   
       if (validateUserData(updatedData)) {
+      //
+
         console.log("✅ Dados válidos, mudando step");
         setVerificationMethod("rekognition");
         setTimeout(() => {
@@ -69,23 +71,24 @@ const Index = () => {
       }
     }
   
-    setupIframeMessageListener((data) => {
-      const complete = data.name && data.cpf && data.birthDate;
-      if (complete) {
-        const updated = {
-          fullName: data.name,
-          cpf: data.cpf,
-          birthDate: data.birthDate,
-          referenceImg: null
-        };
-        setUserData(updated);
+    // setupIframeMessageListener((data) => {
+    //   const complete = data.name && data.cpf && data.birthDate && data.fatherUrl;
+    //   if (complete) {
+    //     const updated = {
+    //       fullName: data.name,
+    //       cpf: data.cpf,
+    //       birthDate: data.birthDate,
+    //       referenceImg: null,
+    //       fatherUrl:data.fatherUrl
+    //     };
+    //     setUserData(updated);
   
-        if (validateUserData(updated)) {
-          setVerificationMethod("rekognition");
-          setStep(1)
-        }
-      }
-    });
+    //     if (validateUserData(updated)) {
+    //       setVerificationMethod("rekognition");
+    //       setStep(1)
+    //     }
+    //   }
+    // });
   }, []);
   
   
@@ -128,7 +131,9 @@ const Index = () => {
         birthDate: formatDateForAPI(userData.birthDate),
         referenceImage: capturedImage,
         type: documentType,
-        verificationMethod: verificationMethod
+        verificationMethod: verificationMethod,
+        front: "",
+        back: ""
       });
       
       if (response) {
@@ -182,8 +187,8 @@ const Index = () => {
         onImageCapture={setCapturedImage}
         onTermsAcceptedChange={setTermsAccepted}
         onVerify={handleVerification}
-        onRetry={resetVerification}
-      />
+        onRetry={resetVerification}     
+          />
     </div>
   );
 };
