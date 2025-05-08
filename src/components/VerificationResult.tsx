@@ -20,7 +20,8 @@ const VerificationResult: React.FC<VerificationResultProps> = ({
   const [messageSent, setMessageSent] = useState(false);
 
   useEffect(() => {
-    if (messageSent && result) {
+
+    if (result) {
       window.parent.postMessage(
         {
           status: "error",
@@ -28,7 +29,7 @@ const VerificationResult: React.FC<VerificationResultProps> = ({
           userId: "123456",
           message: result.message,
         },
-        "*"
+        originUrl.toString()
       );
       onClose();
     }
