@@ -28,7 +28,7 @@ const VerificationResult: React.FC<VerificationResultProps> = ({
           userId: "123456",
           message: result.message,
         },
-        originUrl.toString()
+        "*"
       );
       onClose();
     }
