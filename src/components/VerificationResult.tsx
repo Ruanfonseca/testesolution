@@ -21,7 +21,7 @@ const VerificationResult: React.FC<VerificationResultProps> = ({
 
   useEffect(() => {
 
-    if (result) {
+    if (result && messageSent ) {
       window.parent.postMessage(
         {
           status: "error",
