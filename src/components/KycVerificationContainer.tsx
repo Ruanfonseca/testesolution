@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
 import {
   Card,
   CardHeader,
@@ -66,7 +68,6 @@ const KycVerificationContainer: React.FC<KycVerificationContainerProps> = ({
   
   
   const handleClose = () => {
-    console.log("handleClose disparado");
     setDialogOpen(false);
     setStartDetection(false);
   };
@@ -150,36 +151,29 @@ const KycVerificationContainer: React.FC<KycVerificationContainerProps> = ({
         return (
           <>
             <UserInfoCard userData={userData} />
-            
-            <AlertDialog open={dialogOpen}>
-                <AlertDialogContent className="w-full h-screen md:h-auto p-0 md:p-6 bg-white outline-none border-none max-w-5xl flex items-center justify-center">
-                  <section className="w-full h-full flex flex-col items-center justify-center relative">
-                    {loadingSession ? (
-                      <Loader className="w-20" />
-                    ) : (
-                      <>
-                      <div className="w-full h-full flex justify-center items-center">
-                          <ThemeProvider theme={faceLesstheme}>
-                            <FaceLivenessDetector
-                              displayText={defaultLivenessDisplayText}
-                              sessionId={sessionId}
-                              region="us-east-1"
-                              onAnalysisComplete={handleAnalysisComplete}
-                              onUserCancel={handleClose}
-                              onError={(err) => {
-                                console.error("Erro no detector:", err);
-                                toast.error("Erro na verificação facial");
-                                handleClose();
-                              }}
-                            />
-                          </ThemeProvider>
-                        </div>
+            {dialogOpen && (
+                <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
+                  {loadingSession ? (
+                    <Loader className="w-20" />
+                  ) : (
+                    <ThemeProvider theme={faceLesstheme}>
+                      <FaceLivenessDetector
+                        displayText={defaultLivenessDisplayText}
+                        sessionId={sessionId}
+                        region="us-east-1"
+                        onAnalysisComplete={handleAnalysisComplete}
+                        onUserCancel={handleClose}
+                        onError={(err) => {
+                          console.error("Erro no detector:", err);
+                          toast.error("Erro na verificação facial");
+                          handleClose();
+                        }}
+                      />
+                    </ThemeProvider>
+                  )}
+                </div>
+              )}
 
-                      </>
-                    )}
-                  </section>
-                </AlertDialogContent>
-              </AlertDialog>
 
           </>
         );
@@ -212,22 +206,21 @@ const KycVerificationContainer: React.FC<KycVerificationContainerProps> = ({
 
   
           case 3:
-            return (
-              <>
-                <UserInfoCard userData={userData} />
-                <ProcessingVerification
-                  userData={userData}
-                  onStepChange={onStepChange}
-                  setResponseWebService={setResponseWebService}
-                />
+              return (
+                <>
+                  <UserInfoCard userData={userData} />
+                  <ProcessingVerification
+                    userData={userData}
+                    onStepChange={onStepChange}
+                    setResponseWebService={setResponseWebService}
+                  />
 
-              </>
-            );
+                </>
+              );
     
             case 4:
                 return (
                   <>
-                    <UserInfoCard userData={userData} />
                     <VerificationResult
                       result={responseWebService}
                       onRetry={onRetry}
@@ -246,14 +239,21 @@ const KycVerificationContainer: React.FC<KycVerificationContainerProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto">
-         {renderStepContent()}
-      
-    
-
-
+    <div className="max-w-md mx-auto relative min-h-[400px]">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -50 }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+        >
+          {renderStepContent()}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
+  
 };
 
 export default KycVerificationContainer;

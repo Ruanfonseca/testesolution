@@ -49,8 +49,8 @@ export const verifyFacialLiveness = async (payload: UserData): Promise<ResponseW
   try {
     if (payload.cpf === "17192891746") {
       return {
-        approved: true,
-        message: "Verificação facial e consulta PEP realizadas com sucesso.",
+        approved: false,
+        message: "Esse Usuário é Pep",
         enrichments: [
           {
             document: "17192891746",
@@ -106,14 +106,14 @@ export const verifyFacialLiveness = async (payload: UserData): Promise<ResponseW
     }
 
     return {
-      approved: false,
-      message: "CPF não encontrado ou não consta como PEP.",
+      approved: true,
+      message: "Não consta como PEP.",
       enrichments: []
     };
   } catch (error) {
     console.error("Erro na verificação facial:", error);
     return {
-      approved: false,
+      approved: null,
       message: "Erro ao processar verificação facial.",
       enrichments: []
     };

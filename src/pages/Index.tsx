@@ -189,6 +189,8 @@ const Index = () => {
         onVerify={handleVerification}
         onRetry={resetVerification}     
           />
+
+          
     </div>
   );
 };

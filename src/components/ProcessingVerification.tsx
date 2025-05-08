@@ -9,6 +9,7 @@ interface ProcessingVerificationProps {
   setResponseWebService: (response: ResponseWebService) => void;
 }
 
+
 const ProcessingVerification: React.FC<ProcessingVerificationProps> = ({
   userData,
   onStepChange,
@@ -17,18 +18,20 @@ const ProcessingVerification: React.FC<ProcessingVerificationProps> = ({
   useEffect(() => {
     const processVerification = async () => {
       try {
+        
         const result = await verifyFacialLiveness(userData);
+
         setResponseWebService(result);
 
         if (result.approved) {
-          onStepChange(4); // Ir para resultado final
+          onStepChange(4);
         } else {
-          onStepChange(2); // Voltar para verificação documental
+          onStepChange(2); 
         }
         
       } catch (error) {
         console.error("Erro na verificação facial:", error);
-        onStepChange(2); // fallback
+        onStepChange(2); 
       }
     };
 
