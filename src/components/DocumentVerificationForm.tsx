@@ -1,9 +1,10 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RegulaData, UserData } from "@/types/kyc";
+
 
 interface DocumentVerificationFormProps {
   capturedImage: string | null;
